@@ -22,7 +22,7 @@ export default function StockPage() {
   // AMBIL DATA DARI API
   useEffect(() => {
     axios
-      .get('http://localhost:3000/produk')
+      .get(`${import.meta.env.VITE_API_URL}/produk`)
       .then((response) => {
         setStockData(response.data);
       })

@@ -28,7 +28,7 @@ export default function AddSalePage() {
   // AMBIL PRODUK DARI DATABASE
   useEffect(() => {
     axios
-      .get('http://localhost:3000/produk')
+      .get(`${import.meta.env.VITE_API_URL}/produk`)
       .then((response) => {
         setAvailableProducts(response.data);
       })
@@ -69,7 +69,7 @@ export default function AddSalePage() {
 
     try {
       await axios.post(
-        'http://localhost:3000/penjualan',
+        `${import.meta.env.VITE_API_URL}/penjualan`,
         {
           id_produk: formData.id_produk,
           pembeli: formData.pembeli,

@@ -40,7 +40,7 @@ export default function AddStockPage() {
     try {
 
       await axios.post(
-        'http://localhost:3000/produk',
+        `${import.meta.env.VITE_API_URL}/produk`,
         {
           brand: formData.brand,
           model: formData.model,

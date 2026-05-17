@@ -1,8 +1,5 @@
-// src/pages/SalesPage.tsx
-
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-
 
 import {
   ShoppingCart,
@@ -40,7 +37,7 @@ export default function SalesPage() {
     const fetchSales = () => {
 
       axios
-        .get('http://localhost:3000/penjualan')
+        .get(`${import.meta.env.VITE_API_URL}/penjualan`)
         .then((response) => {
 
           setSalesData(response.data);

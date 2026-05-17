@@ -57,7 +57,7 @@ export default function HomePage() {
     const fetchData = () => {
 
       axios
-        .get('http://localhost:3000/penjualan')
+        .get('import.meta.env.VITE_API_URL')
         .then((response) => {
           setSalesData(response.data);
         })
@@ -66,7 +66,7 @@ export default function HomePage() {
         });
 
       axios
-        .get('http://localhost:3000/produk')
+        .get('import.meta.env.VITE_API_URL')
         .then((response) => {
           setStockData(response.data);
         })
