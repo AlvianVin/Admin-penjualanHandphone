@@ -1,10 +1,7 @@
 // src/pages/HomePage.tsx
-
 import { useEffect, useState } from "react";
 import axios from "axios";
-
 import { TrendingUp, DollarSign, Package, ShoppingBag } from "lucide-react";
-
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface Penjualan {
@@ -24,40 +21,54 @@ interface Produk {
 
 export default function HomePage() {
   const [salesData, setSalesData] = useState<Penjualan[]>([]);
-
   const [stockData, setStockData] = useState<Produk[]>([]);
 
   /*
   =====================================
-  AMBIL DATA REALTIME
+  AMBIL DATA REALTIME (SETIAP 2 DETIK)
   =====================================
   */
-
   useEffect(() => {
     const fetchData = () => {
+      // 1. Hit API untuk Data Penjualan
       axios
-        .get(`https://admin-penjualanhandphone-production.up.railway.app`)
+        .get(`https://admin-penjualanhandphone-production.up.railway.app/penjualan`)
         .then((response) => {
-          setSalesData(response.data);
+          const hasilResponse = response.data;
+          if (Array.isArray(hasilResponse)) {
+            setSalesData(hasilResponse);
+          } else if (hasilResponse && Array.isArray(hasilResponse.data)) {
+            setSalesData(hasilResponse.data);
+          } else {
+            console.warn("Format data penjualan tidak dikenali:", hasilResponse);
+          }
         })
         .catch((error) => {
-          console.log(error);
+          console.error("Gagal mengambil data penjualan:", error);
         });
 
+      // 2. Hit API untuk Data Stok
       axios
-        .get(`https://admin-penjualanhandphone-production.up.railway.app`)
+        .get(`https://admin-penjualanhandphone-production.up.railway.app/produk`)
         .then((response) => {
-          setStockData(response.data);
+          const hasilResponse = response.data;
+          if (Array.isArray(hasilResponse)) {
+            setStockData(hasilResponse);
+          } else if (hasilResponse && Array.isArray(hasilResponse.data)) {
+            setStockData(hasilResponse.data);
+          } else {
+            console.warn("Format data stok tidak dikenali:", hasilResponse);
+          }
         })
         .catch((error) => {
-          console.log(error);
+          console.error("Gagal mengambil data stok:", error);
         });
     };
 
     // LOAD AWAL
     fetchData();
 
-    // AUTO REFRESH
+    // AUTO REFRESH - REALTIME SETIAP 2 DETIK
     const interval = setInterval(() => {
       fetchData();
     }, 2000);
@@ -65,40 +76,34 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Amankan variabel agar fungsi array (.reduce, .length, .forEach) tidak crash jika database kosong
+  const dataPenjualanAman = Array.isArray(salesData) ? salesData : [];
+  const dataStokAman = Array.isArray(stockData) ? stockData : [];
+
   /*
   =====================================
-  STATISTIK
+  STATISTIK (TETAP SESUAI ASLINYA)
   =====================================
   */
-
-  const totalPenjualan = salesData.length;
-
-  const totalPendapatan = salesData.reduce((sum, item) => sum + item.harga, 0);
-
-  const totalStok = stockData.reduce((sum, item) => sum + item.stok, 0);
-
+  const totalPenjualan = dataPenjualanAman.length;
+  const totalPendapatan = dataPenjualanAman.reduce((sum, item) => sum + (Number(item.harga) || 0), 0);
+  const totalStok = dataStokAman.reduce((sum, item) => sum + (Number(item.stok) || 0), 0);
   const rataPenjualan = totalPenjualan > 0 ? (totalPenjualan / 30).toFixed(1) : 0;
 
   /*
   =====================================
-  DATA BULANAN
+  DATA BULANAN (TETAP SESUAI ASLINYA)
   =====================================
   */
-
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-
   const monthlyMap: any = {};
 
   // BUAT 6 BULAN TERAKHIR
   for (let i = 5; i >= 0; i--) {
     const date = new Date();
-
     date.setMonth(date.getMonth() - i);
-
     const month = date.getMonth();
-
     const year = date.getFullYear();
-
     const key = `${year}-${month}`;
 
     monthlyMap[key] = {
@@ -109,13 +114,11 @@ export default function HomePage() {
   }
 
   // ISI DATA DARI DATABASE
-  salesData.forEach((sale) => {
+  dataPenjualanAman.forEach((sale) => {
+    if (!sale.tanggal) return;
     const date = new Date(sale.tanggal);
-
     const month = date.getMonth();
-
     const year = date.getFullYear();
-
     const key = `${year}-${month}`;
 
     if (monthlyMap[key]) {
@@ -127,18 +130,17 @@ export default function HomePage() {
 
   /*
   =====================================
-  TOP BRAND
+  TOP BRAND (TETAP SESUAI ASLINYA)
   =====================================
   */
-
   const brandMap: any = {};
-
-  salesData.forEach((sale) => {
-    if (!brandMap[sale.brand]) {
-      brandMap[sale.brand] = 0;
+  dataPenjualanAman.forEach((sale) => {
+    if (sale.brand) {
+      if (!brandMap[sale.brand]) {
+        brandMap[sale.brand] = 0;
+      }
+      brandMap[sale.brand]++;
     }
-
-    brandMap[sale.brand]++;
   });
 
   const topSalesData = Object.entries(brandMap).map(([brand, jumlah]) => ({
@@ -148,10 +150,9 @@ export default function HomePage() {
 
   /*
   =====================================
-  CARD STATS
+  CARD STATS (TETAP SESUAI ASLINYA)
   =====================================
   */
-
   const stats = [
     {
       title: "Total Penjualan",
@@ -191,7 +192,6 @@ export default function HomePage() {
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-
         <p className="text-gray-500 mt-1">Statistik Penjualan Handphone</p>
       </div>
 
@@ -203,14 +203,10 @@ export default function HomePage() {
               <div className={`${stat.color} p-3 rounded-lg`}>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
-
               <span className={`text-sm font-semibold ${stat.trend.startsWith("+") ? "text-green-600" : "text-red-600"}`}>{stat.trend}</span>
             </div>
-
             <h3 className="text-gray-500 text-sm mb-1">{stat.title}</h3>
-
             <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
-
             <p className="text-gray-400 text-xs mt-1">{stat.subtitle}</p>
           </div>
         ))}
@@ -218,43 +214,33 @@ export default function HomePage() {
 
       {/* CHART */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* LINE */}
+        {/* LINE CHART (PENJUALAN BULANAN) */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <h2 className="text-xl font-bold text-gray-800 mb-6">Penjualan Bulanan</h2>
-
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={monthlySalesData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-
               <XAxis dataKey="bulan" stroke="#6b7280" />
-
-              <YAxis stroke="#6b7280" domain={[0, 100]} />
-
+              {/* Domain diarahkan ke dataMax agar tinggi grafik pas mengikuti data tertinggi */}
+              <YAxis stroke="#6b7280" domain={[0, "dataMax"]} allowDecimals={false} />
               <Tooltip />
-
               <Legend />
-
               <Line type="monotone" dataKey="penjualan" stroke="#6366f1" strokeWidth={2} name="Unit Terjual" />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        {/* BAR */}
+        {/* BAR CHART (TOP BRAND TERLARIS) */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <h2 className="text-xl font-bold text-gray-800 mb-6">Top Brand Terlaris</h2>
-
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={topSalesData} barCategoryGap="30%">
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-
               <XAxis dataKey="brand" stroke="#6b7280" />
-
-              <YAxis stroke="#6b7280" domain={[0, 100]} />
-
+              {/* Domain diarahkan ke dataMax agar tinggi grafik pas mengikuti data tertinggi */}
+              <YAxis stroke="#6b7280" domain={[0, "dataMax"]} allowDecimals={false} />
               <Tooltip />
-
               <Legend />
-
               <Bar dataKey="jumlah" fill="#6366f1" name="Unit Terjual" barSize={40} />
             </BarChart>
           </ResponsiveContainer>
@@ -264,41 +250,39 @@ export default function HomePage() {
       {/* TABLE */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Penjualan Terbaru</h2>
-
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Tanggal</th>
-
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Produk</th>
-
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Pembeli</th>
-
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Harga</th>
-
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
               </tr>
             </thead>
-
             <tbody>
-              {salesData.map((sale) => (
-                <tr key={sale.id_penjualan} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 text-sm text-gray-600">{new Date(sale.tanggal).toLocaleDateString("id-ID")}</td>
-
-                  <td className="py-3 px-4 text-sm font-medium text-gray-800">
-                    {sale.brand} {sale.produk}
-                  </td>
-
-                  <td className="py-3 px-4 text-sm text-gray-600">{sale.pembeli}</td>
-
-                  <td className="py-3 px-4 text-sm font-semibold text-gray-800">Rp {sale.harga.toLocaleString("id-ID")}</td>
-
-                  <td className="py-3 px-4">
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">{sale.status}</span>
+              {dataPenjualanAman.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-6 text-gray-400 text-sm">
+                    Tidak ada data penjualan terbaru.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                dataPenjualanAman.map((sale) => (
+                  <tr key={sale.id_penjualan} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-sm text-gray-600">{sale.tanggal ? new Date(sale.tanggal).toLocaleDateString("id-ID") : "-"}</td>
+                    <td className="py-3 px-4 text-sm font-medium text-gray-800">
+                      {sale.brand} {sale.produk}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-600">{sale.pembeli}</td>
+                    <td className="py-3 px-4 text-sm font-semibold text-gray-800">Rp {(sale.harga || 0).toLocaleString("id-ID")}</td>
+                    <td className="py-3 px-4">
+                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">{sale.status}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
