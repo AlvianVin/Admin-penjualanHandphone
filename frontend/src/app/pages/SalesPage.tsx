@@ -37,7 +37,7 @@ export default function SalesPage() {
     const fetchSales = () => {
 
       axios
-        .get(`${import.meta.env.VITE_API_URL}/penjualan`)
+        .get(`https://admin-penjualanhandphone-production.up.railway.app/penjualan`)
         .then((response) => {
 
           setSalesData(response.data);

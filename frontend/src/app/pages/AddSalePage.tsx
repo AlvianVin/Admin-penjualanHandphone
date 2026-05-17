@@ -28,7 +28,7 @@ export default function AddSalePage() {
   // AMBIL PRODUK DARI DATABASE
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/produk`)
+      .get(`https://admin-penjualanhandphone-production.up.railway.app/produk`)
       .then((response) => {
         setAvailableProducts(response.data);
       })
@@ -69,7 +69,7 @@ export default function AddSalePage() {
 
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/penjualan`,
+        `https://admin-penjualanhandphone-production.up.railway.app/penjualan`,
         {
           id_produk: formData.id_produk,
           pembeli: formData.pembeli,

@@ -22,7 +22,7 @@ export default function LoginPage() {
     try {
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/login`,
+        `https://admin-penjualanhandphone-production.up.railway.app/login`,
         {
           username,
           password

@@ -40,7 +40,7 @@ export default function AddStockPage() {
     try {
 
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/produk`,
+        `https://admin-penjualanhandphone-production.up.railway.app/produk`,
         {
           brand: formData.brand,
           model: formData.model,

@@ -22,7 +22,7 @@ export default function StockPage() {
   // AMBIL DATA DARI API
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/produk`)
+      .get(`https://admin-penjualanhandphone-production.up.railway.app/produk`)
       .then((response) => {
         setStockData(response.data);
       })
