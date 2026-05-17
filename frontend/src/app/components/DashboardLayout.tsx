@@ -1,15 +1,21 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react'; // 1. Tambahkan useState
 import { Outlet, useNavigate, NavLink } from 'react-router';
 import { Home, Package, ShoppingCart, Plus, LogOut, Smartphone } from 'lucide-react';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
-  const adminName = localStorage.getItem('adminName') || 'Admin';
+  
+  // 2. Gunakan state agar React tahu kapan harus me-render ulang nama admin
+  const [adminName, setAdminName] = useState('Admin');
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (!isLoggedIn) {
       navigate('/');
+    } else {
+      // 3. Ambil nama admin secara dinamis begitu komponen aktif
+      const storedName = localStorage.getItem('adminName');
+      if (storedName) setAdminName(storedName);
     }
   }, [navigate]);
 
@@ -68,7 +74,8 @@ export default function DashboardLayout() {
         <div className="p-4 border-t border-indigo-800">
           <div className="flex items-center justify-between mb-3 px-4 py-2 bg-indigo-800 rounded-lg">
             <div>
-              <p className="text-sm font-medium">{adminName}</p>
+              {/* Nama Admin sekarang akan langsung muncul secara dinamis */}
+              <p className="text-sm font-medium">{adminName}</p> 
               <p className="text-xs text-indigo-300">Administrator</p>
             </div>
           </div>
