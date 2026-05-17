@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router'; // Menggunakan react-router agar seragam dengan file lainnya
 import axios from 'axios';
 
 import {
@@ -12,8 +12,6 @@ export default function LoginPage() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
 
@@ -38,7 +36,8 @@ export default function LoginPage() {
           response.data.admin.username
         );
 
-        navigate('/dashboard');
+        // Menggunakan window.location.href untuk memaksa sinkronisasi state browser secara instan
+        window.location.href = '/dashboard';
 
       } else {
 
