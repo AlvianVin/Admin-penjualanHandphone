@@ -472,7 +472,6 @@ app.get('/detail-penjualan', (req, res) => {
 JALANKAN SERVER
 =====================================
 */
+import serverless from 'serverless-http';
 
-app.listen(3000, () => {
-  console.log('Server running di port 3000');
-});
+export default serverless(app);
