@@ -2,6 +2,7 @@ import express from 'express';
 import mysql from 'mysql2';
 import cors from 'cors';
 
+
 const app = express();
 
 app.use(cors());
@@ -42,7 +43,7 @@ LOGIN
 =====================================
 */
 
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
 
   const { username, password } = req.body;
 
@@ -87,7 +88,7 @@ AMBIL SEMUA PRODUK
 =====================================
 */
 
-app.get('/produk', (req, res) => {
+app.get('/api/produk', (req, res) => {
 
   const sql = `
     SELECT * FROM produk
@@ -116,7 +117,7 @@ TAMBAH PRODUK
 =====================================
 */
 
-app.post('/produk', (req, res) => {
+app.post('/api/produk', (req, res) => {
 
   const {
     brand,
@@ -176,7 +177,7 @@ AMBIL SEMUA PENJUALAN
 =====================================
 */
 
-app.get('/penjualan', (req, res) => {
+app.get('/api/penjualan', (req, res) => {
 
   const sql = `
     SELECT
@@ -224,7 +225,7 @@ TAMBAH PENJUALAN
 =====================================
 */
 
-app.post('/penjualan', (req, res) => {
+app.post('/api/penjualan', (req, res) => {
 
   console.log(req.body);
 
@@ -431,7 +432,7 @@ AMBIL DETAIL PENJUALAN
 =====================================
 */
 
-app.get('/detail-penjualan', (req, res) => {
+app.get('/api//detail-penjualan', (req, res) => {
 
   const sql = `
     SELECT * FROM detail_penjualan
