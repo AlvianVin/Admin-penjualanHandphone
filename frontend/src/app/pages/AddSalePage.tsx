@@ -28,7 +28,7 @@ export default function AddSalePage() {
   // AMBIL PRODUK DARI DATABASE
   useEffect(() => {
     axios
-      .get(`https://admin-penjualanhandphone-production.up.railway.app/produk`)
+      .get(`https://backend-admin.vercel.app/produk`)
       .then((response) => {
         setAvailableProducts(response.data);
       })
@@ -69,7 +69,7 @@ export default function AddSalePage() {
 
     try {
       await axios.post(
-        `https://admin-penjualanhandphone-production.up.railway.app/penjualan`,
+        `https://backend-admin.vercel.app/penjualan`,
         {
           id_produk: formData.id_produk,
           pembeli: formData.pembeli,

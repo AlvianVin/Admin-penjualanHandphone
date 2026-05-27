@@ -32,7 +32,7 @@ export default function HomePage() {
     const fetchData = () => {
       // 1. Hit API untuk Data Penjualan
       axios
-        .get(`https://admin-penjualanhandphone-production.up.railway.app/penjualan`)
+        .get(`https://backend-admin.vercel.app/penjualan`)
         .then((response) => {
           const hasilResponse = response.data;
           if (Array.isArray(hasilResponse)) {
@@ -49,7 +49,7 @@ export default function HomePage() {
 
       // 2. Hit API untuk Data Stok
       axios
-        .get(`https://admin-penjualanhandphone-production.up.railway.app/produk`)
+        .get(`https://backend-admin.vercel.app/produk`)
         .then((response) => {
           const hasilResponse = response.data;
           if (Array.isArray(hasilResponse)) {

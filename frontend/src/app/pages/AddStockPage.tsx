@@ -40,7 +40,7 @@ export default function AddStockPage() {
     try {
 
       await axios.post(
-        `https://admin-penjualanhandphone-production.up.railway.app/produk`,
+        `https://backend-admin.vercel.app/produk`,
         {
           brand: formData.brand,
           model: formData.model,

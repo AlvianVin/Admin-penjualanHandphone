@@ -37,7 +37,7 @@ export default function SalesPage() {
     const fetchSales = () => {
 
       axios
-        .get(`https://admin-penjualanhandphone-production.up.railway.app/penjualan`)
+        .get(`https://backend-admin.vercel.app/penjualan`)
         .then((response) => {
 
           setSalesData(response.data);
