@@ -49,7 +49,7 @@ export default function HomePage() {
 
       // 2. Hit API untuk Data Stok
       axios
-        .get(`https://backend-admin.vercel.app/api/produk`)
+        .get(`https://admin-penjualan-handphone-z8wz.vercel.app/api/produk`)
         .then((response) => {
           const hasilResponse = response.data;
           if (Array.isArray(hasilResponse)) {

@@ -20,7 +20,7 @@ export default function LoginPage() {
     try {
 
       const response = await axios.post(
-        `https://backend-admin.vercel.app/api/login`,
+        `https://admin-penjualan-handphone-z8wz.vercel.app/api/login`,
         {
           username,
           password

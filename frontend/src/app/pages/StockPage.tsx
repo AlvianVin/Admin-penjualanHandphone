@@ -22,7 +22,7 @@ export default function StockPage() {
   // AMBIL DATA DARI API
   useEffect(() => {
     axios
-      .get(`https://backend-admin.vercel.app/api/produk`)
+      .get(`https://admin-penjualan-handphone-z8wz.vercel.app/api/produk`)
       .then((response) => {
         setStockData(response.data);
       })

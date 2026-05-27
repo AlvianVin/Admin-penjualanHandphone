@@ -28,7 +28,7 @@ export default function AddSalePage() {
   // AMBIL PRODUK DARI DATABASE
   useEffect(() => {
     axios
-      .get(`https://backend-admin.vercel.app/api/produk`)
+      .get(`https://admin-penjualan-handphone-z8wz.vercel.app/api/produk`)
       .then((response) => {
         setAvailableProducts(response.data);
       })
