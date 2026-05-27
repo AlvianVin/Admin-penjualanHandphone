@@ -1,10 +1,14 @@
 import express from 'express';
-import serverless from 'serverless-http';
 
 const app = express();
 
 app.get('/api/ping', (req, res) => {
-  res.json({ status: 'express ok' });
+  res.json({ status: 'express only' });
 });
 
-export default serverless(app);
+export default async function handler(req, res) {
+  return new Promise((resolve) => {
+    app(req, res);
+    resolve();
+  });
+}
