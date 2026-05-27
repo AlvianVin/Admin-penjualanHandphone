@@ -32,7 +32,7 @@ export default function HomePage() {
     const fetchData = () => {
       // 1. Hit API untuk Data Penjualan
       axios
-        .get(`https://backend-admin.vercel.app/penjualan`)
+        .get(`https://admin-penjualan-handphone-z8wz.vercel.app/api/penjualan`)
         .then((response) => {
           const hasilResponse = response.data;
           if (Array.isArray(hasilResponse)) {
