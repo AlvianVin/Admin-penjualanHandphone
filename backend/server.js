@@ -1,6 +1,7 @@
 import express from 'express';
 import mysql from 'mysql2';
 import cors from 'cors';
+import serverless from 'serverless-http';
 
 
 const app = express();
@@ -460,6 +461,6 @@ app.get('/api/detail-penjualan', (req, res) => {
 JALANKAN SERVER
 =====================================
 */
-import serverless from 'serverless-http';
+
 
 export default serverless(app);
