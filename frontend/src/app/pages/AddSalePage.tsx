@@ -28,7 +28,7 @@ export default function AddSalePage() {
   // AMBIL PRODUK DARI DATABASE
   useEffect(() => {
     axios
-      .get(`https://backend-admin.vercel.app/produk`)
+      .get(`https://backend-admin.vercel.app/api/produk`)
       .then((response) => {
         setAvailableProducts(response.data);
       })
