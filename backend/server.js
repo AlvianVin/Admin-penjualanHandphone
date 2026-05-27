@@ -432,7 +432,7 @@ AMBIL DETAIL PENJUALAN
 =====================================
 */
 
-app.get('/api//detail-penjualan', (req, res) => {
+app.get('/api/detail-penjualan', (req, res) => {
 
   const sql = `
     SELECT * FROM detail_penjualan
