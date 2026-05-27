@@ -69,7 +69,7 @@ export default function AddSalePage() {
 
     try {
       await axios.post(
-        `https://backend-admin.vercel.app/penjualan`,
+        `https://admin-penjualan-handphone-z8wz.vercel.app/api/penjualan`,
         {
           id_produk: formData.id_produk,
           pembeli: formData.pembeli,
