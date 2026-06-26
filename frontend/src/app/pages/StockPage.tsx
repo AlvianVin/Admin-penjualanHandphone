@@ -53,18 +53,18 @@ export default function StockPage() {
   ).length;
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 lg:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
           Stok Handphone
         </h1>
 
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-500 mt-1 text-sm sm:text-base">
           Kelola dan pantau inventori handphone
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 lg:mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -180,7 +180,7 @@ export default function StockPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">

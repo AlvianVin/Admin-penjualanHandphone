@@ -74,15 +74,15 @@ export default function AddStockPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
 
-      <div className="mb-8">
+      <div className="mb-6 lg:mb-8">
 
-        <h1 className="text-3xl font-bold text-gray-800">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
           Tambah Stok HP
         </h1>
 
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-500 mt-1 text-sm sm:text-base">
           Tambahkan produk handphone baru
         </p>
 
