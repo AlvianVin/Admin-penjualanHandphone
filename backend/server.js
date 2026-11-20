@@ -1,8 +1,7 @@
 import express from 'express';
-import mysql from 'mysql2';
+import pg from 'pg';
 import cors from 'cors';
 import serverless from 'serverless-http';
-
 
 const app = express();
 
@@ -11,22 +10,14 @@ app.use(express.json());
 
 /*
 =====================================
-KONEKSI DATABASE
+KONEKSI DATABASE (Supabase PostgreSQL)
 =====================================
 */
 
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  connectTimeout: 10000
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
-
 
 /*
 =====================================
@@ -44,43 +35,23 @@ LOGIN
 =====================================
 */
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const result = await pool.query(
+      'SELECT * FROM admin WHERE username = $1 AND password = $2',
+      [username, password]
+    );
 
-  const { username, password } = req.body;
-
-  const sql = `
-    SELECT * FROM admin
-    WHERE username = ? AND password = ?
-  `;
-
-  db.query(sql, [username, password], (err, result) => {
-
-    if (err) {
-
-      console.log(err);
-
-      return res.status(500).json(err);
-
-    }
-
-    if (result.length > 0) {
-
-      res.json({
-        success: true,
-        admin: result[0]
-      });
-
+    if (result.rows.length > 0) {
+      res.json({ success: true, admin: result.rows[0] });
     } else {
-
-      res.json({
-        success: false,
-        message: 'Username atau password salah'
-      });
-
+      res.json({ success: false, message: 'Username atau password salah' });
     }
-
-  });
-
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
 });
 
 /*
@@ -89,27 +60,16 @@ AMBIL SEMUA PRODUK
 =====================================
 */
 
-app.get('/api/produk', (req, res) => {
-
-  const sql = `
-    SELECT * FROM produk
-    ORDER BY id_produk DESC
-  `;
-
-  db.query(sql, (err, result) => {
-
-    if (err) {
-
-      console.log(err);
-
-      return res.status(500).json(err);
-
-    }
-
-    res.json(result);
-
-  });
-
+app.get('/api/produk', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM produk ORDER BY id_produk DESC'
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
 });
 
 /*
@@ -118,58 +78,18 @@ TAMBAH PRODUK
 =====================================
 */
 
-app.post('/api/produk', (req, res) => {
-
-  const {
-    brand,
-    model,
-    warna,
-    kategori,
-    stok,
-    harga
-  } = req.body;
-
-  const sql = `
-    INSERT INTO produk
-    (
-      brand,
-      model,
-      warna,
-      kategori,
-      stok,
-      harga
-    )
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(
-    sql,
-    [
-      brand,
-      model,
-      warna,
-      kategori,
-      stok,
-      harga
-    ],
-    (err, result) => {
-
-      if (err) {
-
-        console.log(err);
-
-        return res.status(500).json(err);
-
-      }
-
-      res.json({
-        success: true,
-        message: 'Produk berhasil ditambahkan'
-      });
-
-    }
-  );
-
+app.post('/api/produk', async (req, res) => {
+  try {
+    const { brand, model, warna, kategori, stok, harga } = req.body;
+    await pool.query(
+      'INSERT INTO produk (brand, model, warna, kategori, stok, harga) VALUES ($1, $2, $3, $4, $5, $6)',
+      [brand, model, warna, kategori, stok, harga]
+    );
+    res.json({ success: true, message: 'Produk berhasil ditambahkan' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
 });
 
 /*
@@ -178,46 +98,30 @@ AMBIL SEMUA PENJUALAN
 =====================================
 */
 
-app.get('/api/penjualan', (req, res) => {
-
-  const sql = `
-    SELECT
-      penjualan.id_penjualan,
-      penjualan.tanggal,
-      penjualan.pembeli,
-      penjualan.total_harga AS harga,
-      penjualan.status,
-
-      produk.brand,
-      produk.model AS produk
-
-    FROM penjualan
-
-    JOIN detail_penjualan
-      ON penjualan.id_penjualan =
-         detail_penjualan.id_penjualan
-
-    JOIN produk
-      ON detail_penjualan.id_produk =
-         produk.id_produk
-
-    ORDER BY penjualan.id_penjualan DESC
-  `;
-
-  db.query(sql, (err, result) => {
-
-    if (err) {
-
-      console.log(err);
-
-      return res.status(500).json(err);
-
-    }
-
-    res.json(result);
-
-  });
-
+app.get('/api/penjualan', async (req, res) => {
+  try {
+    const sql = `
+      SELECT
+        penjualan.id_penjualan,
+        penjualan.tanggal,
+        penjualan.pembeli,
+        penjualan.total_harga AS harga,
+        penjualan.status,
+        produk.brand,
+        produk.model AS produk
+      FROM penjualan
+      JOIN detail_penjualan
+        ON penjualan.id_penjualan = detail_penjualan.id_penjualan
+      JOIN produk
+        ON detail_penjualan.id_produk = produk.id_produk
+      ORDER BY penjualan.id_penjualan DESC
+    `;
+    const result = await pool.query(sql);
+    res.json(result.rows);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
 });
 
 /*
@@ -226,205 +130,71 @@ TAMBAH PENJUALAN
 =====================================
 */
 
-app.post('/api/penjualan', (req, res) => {
+app.post('/api/penjualan', async (req, res) => {
+  const client = await pool.connect();
 
-  console.log(req.body);
+  try {
+    const { id_produk, pembeli, metode, total_harga } = req.body;
 
-  const {
-    id_produk,
-    pembeli,
-    metode,
-    total_harga
-  } = req.body;
-
-  // VALIDASI
-  if (!id_produk) {
-
-    return res.status(400).json({
-      message: 'Produk belum dipilih'
-    });
-
-  }
-
-  /*
-  =====================================
-  CEK PRODUK
-  =====================================
-  */
-
-  db.query(
-    `
-    SELECT * FROM produk
-    WHERE id_produk = ?
-    `,
-    [id_produk],
-    (errProduk, produkResult) => {
-
-      if (errProduk) {
-
-        console.log(errProduk);
-
-        return res.status(500).json(errProduk);
-
-      }
-
-      if (produkResult.length === 0) {
-
-        return res.status(404).json({
-          message: 'Produk tidak ditemukan'
-        });
-
-      }
-
-      const produk = produkResult[0];
-
-      /*
-      =====================================
-      CEK STOK
-      =====================================
-      */
-
-      if (produk.stok <= 0) {
-
-        return res.status(400).json({
-          message: 'Stok habis'
-        });
-
-      }
-
-      const invoice =
-        `INV-${Date.now()}`;
-
-      const tanggal =
-        new Date();
-
-      const status =
-        'Selesai';
-
-      /*
-      =====================================
-      INSERT PENJUALAN
-      =====================================
-      */
-
-      const sqlPenjualan = `
-        INSERT INTO penjualan
-        (
-          invoice,
-          tanggal,
-          pembeli,
-          metode_pembayaran,
-          total_harga,
-          status,
-          id_admin
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      db.query(
-        sqlPenjualan,
-        [
-          invoice,
-          tanggal,
-          pembeli,
-          metode,
-          total_harga,
-          status,
-          3
-        ],
-        (errPenjualan, resultPenjualan) => {
-
-          if (errPenjualan) {
-
-            console.log(errPenjualan);
-
-            return res.status(500).json(errPenjualan);
-
-          }
-
-          const id_penjualan =
-            resultPenjualan.insertId;
-
-          /*
-          =====================================
-          INSERT DETAIL PENJUALAN
-          =====================================
-          */
-
-          const sqlDetail = `
-            INSERT INTO detail_penjualan
-            (
-              id_penjualan,
-              id_produk,
-              jumlah,
-              harga_satuan,
-              subtotal
-            )
-            VALUES (?, ?, ?, ?, ?)
-          `;
-
-          db.query(
-            sqlDetail,
-            [
-              id_penjualan,
-              id_produk,
-              1,
-              produk.harga,
-              produk.harga
-            ],
-            (errDetail) => {
-
-              if (errDetail) {
-
-                console.log(errDetail);
-
-                return res.status(500).json(errDetail);
-
-              }
-
-              /*
-              =====================================
-              UPDATE STOK
-              =====================================
-              */
-
-              const sqlUpdateStok = `
-                UPDATE produk
-                SET stok = stok - 1
-                WHERE id_produk = ?
-              `;
-
-              db.query(
-                sqlUpdateStok,
-                [id_produk],
-                (errUpdate) => {
-
-                  if (errUpdate) {
-
-                    console.log(errUpdate);
-
-                    return res.status(500).json(errUpdate);
-
-                  }
-
-                  res.json({
-                    success: true,
-                    message:
-                      'Transaksi berhasil disimpan'
-                  });
-
-                }
-              );
-
-            }
-          );
-
-        }
-      );
-
+    if (!id_produk) {
+      return res.status(400).json({ message: 'Produk belum dipilih' });
     }
-  );
 
+    // CEK PRODUK
+    const produkResult = await client.query(
+      'SELECT * FROM produk WHERE id_produk = $1',
+      [id_produk]
+    );
+
+    if (produkResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Produk tidak ditemukan' });
+    }
+
+    const produk = produkResult.rows[0];
+
+    if (produk.stok <= 0) {
+      return res.status(400).json({ message: 'Stok habis' });
+    }
+
+    const invoice = `INV-${Date.now()}`;
+    const tanggal = new Date();
+    const status = 'Selesai';
+
+    // Gunakan transaction
+    await client.query('BEGIN');
+
+    // INSERT PENJUALAN
+    const penjualanResult = await client.query(
+      `INSERT INTO penjualan (invoice, tanggal, pembeli, metode_pembayaran, total_harga, status, id_admin)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_penjualan`,
+      [invoice, tanggal, pembeli, metode, total_harga, status, 3]
+    );
+
+    const id_penjualan = penjualanResult.rows[0].id_penjualan;
+
+    // INSERT DETAIL PENJUALAN
+    await client.query(
+      `INSERT INTO detail_penjualan (id_penjualan, id_produk, jumlah, harga_satuan, subtotal)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [id_penjualan, id_produk, 1, produk.harga, produk.harga]
+    );
+
+    // UPDATE STOK
+    await client.query(
+      'UPDATE produk SET stok = stok - 1 WHERE id_produk = $1',
+      [id_produk]
+    );
+
+    await client.query('COMMIT');
+
+    res.json({ success: true, message: 'Transaksi berhasil disimpan' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.log(err);
+    res.status(500).json(err);
+  } finally {
+    client.release();
+  }
 });
 
 /*
@@ -433,27 +203,16 @@ AMBIL DETAIL PENJUALAN
 =====================================
 */
 
-app.get('/api/detail-penjualan', (req, res) => {
-
-  const sql = `
-    SELECT * FROM detail_penjualan
-    ORDER BY id_detail DESC
-  `;
-
-  db.query(sql, (err, result) => {
-
-    if (err) {
-
-      console.log(err);
-
-      return res.status(500).json(err);
-
-    }
-
-    res.json(result);
-
-  });
-
+app.get('/api/detail-penjualan', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM detail_penjualan ORDER BY id_detail DESC'
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
 });
 
 /*
@@ -461,6 +220,5 @@ app.get('/api/detail-penjualan', (req, res) => {
 JALANKAN SERVER
 =====================================
 */
-
 
 export default serverless(app);
